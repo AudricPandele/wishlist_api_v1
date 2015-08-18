@@ -34,6 +34,7 @@ class WishlistLink
   property :link, String, :length => 255
   property :picture, String, :length => 255
   property :description, String, :length => 255
+  property :title, String, :length => 255
   property :wishlist_id, Integer
 
 end
@@ -317,7 +318,6 @@ get '/wishlistslinks' do
 end
 
 # CREATE: Route to create a new WishlistLink
-## http://0.0.0.0:9292/wishlists?id=1&created_at=2015-07-20&title=List1&description=C'est ma premiere liste
 post '/wishlistslinks' do
   content_type :json
 
@@ -325,6 +325,7 @@ post '/wishlistslinks' do
   @page = MetaInspector.new(params[:link])
   params[:picture] = @page.images.best
   params[:description] = @page.description
+  params[:title] = @page.title
 
   # These next commented lines are for if you are using Backbone.js
   # JSON is sent in the body of the http request. We need to parse the body
