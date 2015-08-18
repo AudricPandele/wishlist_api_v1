@@ -1,1 +1,1 @@
-# wishlist_api_v1
+# Sinatra JSON API
