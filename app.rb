@@ -6,9 +6,20 @@ Bundler.require
 
 require 'sinatra/cross_origin'
 
+use Rack::Logger
+
+before do
+     content_type :json
+     headers 'Access-Control-Allow-Origin' => '*',
+  		   'Access-Control-Allow-Methods' => ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE'],
+  		   'Access-Control-Allow-Headers' => 'Content-Type'
+end
+
 configure do
   enable :cross_origin
 end
+
+ set :protection, false
 
 # Setup DataMapper with a database URL. On Heroku, ENV['DATABASE_URL'] will be
 # set, when working locally this line will fall back to using SQLite in the
@@ -36,6 +47,7 @@ class WishlistLink
   property :description, String, :length => 255
   property :title, String, :length => 255
   property :wishlist_id, Integer
+  property :rate, Integer, :default => 3
 
 end
 
@@ -52,6 +64,29 @@ DataMapper.finalize
 
 # Tell DataMapper to update the database according to the definitions above.
 DataMapper.auto_upgrade!
+
+options '/*' do
+  200
+end
+
+delete '/wishlistslinks/:id' do
+  content_type :json
+   @thing = WishlistLink.get(params[:id].to_i)
+
+   if @thing.destroy
+     {:success => "ok"}.to_json
+   else
+     halt 500
+   end
+
+  #  begin
+  #    params.merge! JSON.parse(request.env["rack.input"].read)
+  #  rescue JSON::ParserError
+  #    logger.error "Cannot parse request body."
+  #  end
+   #
+  #  { result: "#{params[:wishlistslinks]} deleted!", method: 'DELETE' }.to_json
+ end
 
 get '/' do
   send_file './public/index.html'
@@ -399,14 +434,27 @@ put '/wishlistslinks/:id/wishlist_id/:wishlist_id' do
   end
 end
 
-# DELETE: Route to delete a WishlistLink
-delete '/wishlistslinks/:id/delete' do
+put '/wishlistslinks/:id/rate/:rate' do
   content_type :json
-  @thing = WishlistLink.get(params[:id].to_i)
 
-  if @thing.destroy
-    {:success => "ok"}.to_json
+  @thing = WishlistLink.get(params[:id].to_i)
+  @thing.rate = params[:rate]
+
+  if @thing.save
+    @thing.to_json
   else
     halt 500
   end
 end
+
+# DELETE: Route to delete a WishlistLink
+# delete '/wishlistslinks/:id/delete' do
+#   content_type :json
+#   @thing = WishlistLink.get(params[:id].to_i)
+#
+#   if @thing.destroy
+#     {:success => "ok"}.to_json
+#   else
+#     halt 500
+#   end
+# end
