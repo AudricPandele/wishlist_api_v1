@@ -49,6 +49,7 @@ class WishlistLink
   property :wishlist_id, Integer
   property :rate, Integer, :default => 2
   property :color_rate, String, :default => '4CAF50'
+  property :ordered, Boolean, :default => false
 
 end
 
@@ -439,8 +440,9 @@ put '/wishlistslinks/:id' do
   content_type :json
 
   @thing = WishlistLink.get(params[:id].to_i)
-  @thing.rate = params[:rate]
-  @thing.color_rate = params[:color_rate]
+  @thing.rate = params[:rate] if params[:rate]
+  @thing.color_rate = params[:color_rate] if params[:color_rate]
+  @thing.ordered = params[:ordered] if params[:ordered]
 
   if @thing.save
     @thing.to_json
