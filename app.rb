@@ -360,9 +360,17 @@ post '/wishlistslinks' do
 
 
   @page = MetaInspector.new(params[:link])
-  params[:picture] = @page.images.best
+  if params[:link].include?'amazon'
+    picture = "http://www.turnerduckworth.com/media/filer_public/86/18/86187bcc-752a-46f4-94d8-0ce54b98cd46/td-amazon-smile-logo-01-large.jpg"
+  else
+    picture = @page.images.best
+  end
+
+  params[:picture] = picture
   params[:description] = @page.description
-  params[:title] = @page.title
+  params[:title] = @page.best_title
+
+  params.delete_if {|key, value| key.match(/^pf_rd/) }
 
   # These next commented lines are for if you are using Backbone.js
   # JSON is sent in the body of the http request. We need to parse the body
@@ -375,6 +383,37 @@ post '/wishlistslinks' do
 
   if @thing.save
     @thing.to_json
+  else
+    halt 500
+  end
+end
+
+get '/wishlistslinks/website_data' do
+  content_type :json
+
+
+  @page = MetaInspector.new(params[:link])
+
+  if params[:link].include?'amazon'
+    picture = "http://www.turnerduckworth.com/media/filer_public/86/18/86187bcc-752a-46f4-94d8-0ce54b98cd46/td-amazon-smile-logo-01-large.jpg"
+  else
+    picture = @page.images.best
+  end
+
+  params[:picture] = picture
+  params[:description] = @page.description
+  params[:title] = @page.best_title
+
+  params.delete_if {|key, value| key.match(/^pf_rd/) }
+
+  # params.delete(:pf_rd_s)
+  # params.delete(:pf_rd_r)
+  # params.delete(:pf_rd_t)
+  # params.delete(:pf_rd_p)
+  # params.delete(:pf_rd_i)
+
+  if params
+    params.to_json
   else
     halt 500
   end
