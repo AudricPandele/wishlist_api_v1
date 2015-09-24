@@ -50,6 +50,7 @@ class WishlistLink
   property :rate, Integer, :default => 2
   property :color_rate, String, :default => '4CAF50'
   property :ordered, Boolean, :default => false
+  property :price, Float, :default => 0
 
 end
 
@@ -479,6 +480,8 @@ put '/wishlistslinks/:id' do
   content_type :json
 
   @thing = WishlistLink.get(params[:id].to_i)
+  @thing.title = params[:title] if params[:title]
+  @thing.price = params[:price] if params[:price]
   @thing.rate = params[:rate] if params[:rate]
   @thing.color_rate = params[:color_rate] if params[:color_rate]
   @thing.ordered = params[:ordered] if params[:ordered]
